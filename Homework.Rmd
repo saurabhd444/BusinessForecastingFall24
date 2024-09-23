@@ -1,0 +1,90 @@
+---
+title: "Class 2 Assignment"
+author: "Saurabh Dudhane"
+output: html_document
+date: "2024-09-22"
+---
+
+```{r}
+Typical_Employee_Survey_Data <- read.csv("C:/Users/saura/OneDrive/Desktop/Assignment/BF/Typical_Employee_Survey_Data(Survey).csv")
+# Print Headers/Columns
+colnames(Typical_Employee_Survey_Data)
+
+# Sample Data
+head(Typical_Employee_Survey_Data)
+
+# Box plot and 5 Pt Summary for Age
+boxplot(Typical_Employee_Survey_Data$Age)
+fivenum(Typical_Employee_Survey_Data$Age)
+
+# Box plot and 5 Pt Summary for Current_Employer_Duration
+boxplot(Typical_Employee_Survey_Data$Current_Employer_Duration)
+fivenum(Typical_Employee_Survey_Data$Current_Employer_Duration)
+
+#Factor Gender
+Typical_Employee_Survey_Data$Gender <- factor(Typical_Employee_Survey_Data$Gender, levels = c(1, 2), labels = c("Male", "Female"))
+
+#Factor Decision_Making_Participation
+Typical_Employee_Survey_Data$Decision_Making_Participation <- factor(Typical_Employee_Survey_Data$Decision_Making_Participation, levels = c(1, 2), labels = c("Yes", "No"))
+
+Typical_Employee_Survey_Data[c("Age","Gender","Decision_Making_Participation")]
+
+#bar Plot
+# histogram with added parameters
+hist(Typical_Employee_Survey_Data$Age,
+main="Age Distribution of Survey",
+xlab="Age Group",
+xlim=c(20,70),
+col="darkmagenta"
+)
+# Age distribution shows that there are more people in 30-40 Age group who have participated in the survey
+
+# install.packages("ggplot2")
+library(ggplot2)
+#Counting records aggregating by Gender
+ds <- aggregate(Typical_Employee_Survey_Data$Decision_Making_Participation, by = list(Typical_Employee_Survey_Data$Gender),  length)
+colnames(ds)[1] = "Gender"
+colnames(ds)[2] = "count"
+ds
+# Pie Chart for Participation in the Survey by Gender
+ggplot(ds, aes(x = "", y = count, fill = Gender)) +
+  geom_col(color = "black") +
+  geom_text(aes(label = count),
+            position = position_stack(vjust = 0.5),
+             show.legend = FALSE) +
+  coord_polar(theta = "y")+
+  scale_fill_brewer()+
+  theme(axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank(),
+        panel.grid = element_blank(),
+        panel.background = element_rect(fill = "#ebf2ff"),
+        plot.background = element_rect(fill = "#ebf2ff"),
+        legend.background = element_rect(fill = "#ebf2ff"))
+#Pie Chart shows Men have better participation in the survey
+
+# Scatter plot Age vs Current_Employer_Duration
+ggplot(Typical_Employee_Survey_Data, aes(x = Age, y = Current_Employer_Duration)) +
+  geom_point()
+
+#Scatter plot shows the majority of employees are young and relatively new in the organization 
+
+# Data frame for critical Decision_Making_Participation by Gender
+
+df <- aggregate(Typical_Employee_Survey_Data$Decision_Making_Participation, by = list(Typical_Employee_Survey_Data$Gender,Typical_Employee_Survey_Data$Decision_Making_Participation),  length)
+
+colnames(df)[1] = "Gender"
+colnames(df)[2] = "Decision_Making_Participation"
+colnames(df)[3] = "count"
+colnames(df)
+df
+
+# creating plot using the above data
+ggplot(df, aes(Decision_Making_Participation, count, fill = Gender)) +
+  geom_bar(stat="identity", position = "dodge") + 
+  labs(title="Multiple Bar plots")
+# Multiple Bar plot shows Men are more involved in making critical business decisions for the organization
+```
+
+
+
