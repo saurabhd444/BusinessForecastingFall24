@@ -1,0 +1,8 @@
+
+"name":"coal Power.csv","description":"Dataset containing consumption of coal for electricity generation."}]
+
+"extract":{"column":"YYYY quarter"}},"@id":"coal Power.csv/date","@type":"cr:Field","name":"date","description":"year and quarter},
+
+"extract":{"column":"Total consumption : Texas : electric power (total) : quarterly (short tons)"}},
+description :"The quarterly thermal electricity generation in watts  "
+

@@ -1,0 +1,1 @@
+Coal Consumption and generated power data is collected quarterly from all thermal power stations.

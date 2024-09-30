@@ -1,0 +1,4 @@
+The non renewable sources of energy are limited and finite.
+We want to shift the power generation process to renewable source such as wind, solar etc.
+This analysis will help us to understand the current coal consumption rate wrt current coal reserves and what will be our plan of action for future.
+This way we can cut the dependency on coal gradually over the time and have better capacity planning
