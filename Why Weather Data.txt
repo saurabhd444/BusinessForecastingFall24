@@ -1,0 +1,6 @@
+Weather plays crutial role in day to day decisions and businesses.
+It helps farmers to plan their harvest of their yeilds,crops ahead of time.
+Accurate forecasting facillitate  smooth and rewarding businesses decisions and operations(for eg sales and offers on woolen cloths in harsh winters)
+It also helps goverment to take nessesary precautionary measures for severe catastrophical natural disasters
+It really facinates me that so many other critical decision making ,resourcing and planning-> precise weather forceasting plays a crucial role.
+Hence I chose Weather forceasting data
