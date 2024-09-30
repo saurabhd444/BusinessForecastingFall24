@@ -1,4 +1,0 @@
-Weather data is collected daily through Radar measures rain or snow locations and movements.
-Wind vanes measure wind directions.
-Weather balloons, satellites, and radar also help to collect data in the atmosphere.
-Weather Department has various stations containing many instruments for measuring weather conditions and Temperature
