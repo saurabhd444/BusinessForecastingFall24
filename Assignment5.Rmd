@@ -1,0 +1,110 @@
+---
+title: "Assignment5"
+author: "Saurabh Dudhane"
+date: "2024-10-12"
+output: html_document
+---
+```{r}
+library(fpp)
+library(fpp2)
+
+file <- ('C:/Users/saura/OneDrive/Desktop/Assignment/BF/Assignment4/Power Generation.csv')
+#file has quarterly data on thermal power generation in KW (using Coal as the raw material) from 2001 to 2020(80 quarters)
+
+
+#create a Dataframe
+df<-data.frame(read.csv(file))
+head(df)
+
+#create a time series object for power generation
+values<-c(df$Power.Generated.Using.Coal)
+values
+#create x axis quarters matching with data
+ts <- ts(values, start = c(2001, 1), frequency = 4)
+ts
+#Plot Time series Graph
+plot(ts, main = "Quarterly Power Generation from Coal", xlab = "Year", ylab = "Power in KW", col = "blue", lwd = 2)
+
+#plot Decomposition Graph Using stl
+stl_decomp <- stl(ts,s.window ="periodic")
+plot(stl_decomp)
+attributes(stl_decomp)
+
+
+
+
+
+# print out a seasonal adjustment
+seasadj(stl_decomp)
+# Plot a line on the graph
+plot(ts)
+lines(seasadj(stl_decomp), col="Red")
+# Default period forecast
+f_stl <- forecast(stl_decomp)
+# you can pass the # of period
+f_stl <- forecast(stl_decomp,h=15)
+f_stl
+plot(f_stl)
+# There is more than one way to do things
+decomp_ts<- decompose(ts)
+# plot using decompose()
+plot(decomp_ts)
+
+
+# Each one shows different attributes 
+attributes(decomp_ts)
+seasadj(decomp_ts)
+
+#Summarize Decomposition using stl
+summary(stl_decomp)
+
+#The decomposition output from the STL  analysis presents three main components of the time series:
+
+#Seasonal Component:
+
+
+#The mean is approximately 1, indicating minimal net seasonal effect over time.
+#The interquartile range (IQR) is 1,620,735, indicating significant variability.
+
+#Trend Component:
+
+#Ranges from a minimum of 13,827,436 to a maximum of 27,705,563.
+#The mean is about 23,317,044, suggesting a generally increasing trend.
+#The IQR is 2,458,557, reflecting considerable variation in the trend.
+#Error Component:
+
+#Ranges from a minimum of -2,975,079.3 to a maximum of 3,108,411.7.
+#The mean is around -8,246.5, indicating some residual fluctuation that deviates from the trend and seasonality.
+#The IQR is 1,287,341, which shows variability in the residuals.
+#Overall Summary:
+#The output includes specific weights, indicating that all data points were treated equally in the analysis.
+#Other parameters (window sizes, degree, jumps) provide insights into the settings used for the decomposition.
+#Overall, the analysis shows a clear increasing trend with significant seasonal variation and some residual noise.
+
+
+# Decomposition Results (using Decomposition)
+print(decomp_ts)
+
+#Summarize Decomposition Results
+
+#The data spans from 2001 to 2020 and is presented in quarterly format.
+#Values fluctuate over the years, with notable peaks and troughs.
+#Seasonal Component
+#The seasonal effect is consistent across all quarters, with:
+#Q1: -2,346,065
+#Q2: -687,270.5
+#Q3: 3,484,688.7
+#Q4: -451,353.2
+#This indicates a strong seasonal peak in Q3.
+#Trend Component
+#The trend values are calculated for most quarters, showing a general upward trend in early years (2001-2011) followed by a decline:
+#Highest trend values occur around 2011.
+#By 2020, the trend shows significant drops, especially in Q1 and Q2.
+#Random Component
+#The random component reflects variability not explained by seasonal or trend components, showing considerable fluctuations:
+#Some quarters exhibit large positive or negative values, indicating erratic behavior and noise in the data.
+#Summary Statistics
+#The decomposition is classified as "additive," meaning the components add together to reconstruct the original series.
+#Overall, the decomposition reveals significant seasonal patterns, a generally increasing trend followed by a decline, and notable random fluctuations across the time series.
+
+```
