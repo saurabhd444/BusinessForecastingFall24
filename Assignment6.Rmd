@@ -81,14 +81,14 @@ plot(f_stl1)
 
 
 # Naive
-naive_forecast <- naive(ts_truncated,5)
+naive_forecast <- naive(ts_truncated,12)
 plot(naive_forecast)
 # Seasonal Naive
 snaive_forecast <- snaive(ts_truncated,5)
 
 #take Mean of all available history
 
-mean_forecast <- meanf(ts_truncated,5)
+mean_forecast <- meanf(ts_truncated,12)
 plot(mean_forecast)
 
 
@@ -96,5 +96,73 @@ plot(mean_forecast)
 
 MA5_forecast <- ma(ts_truncated,order=5)
 MA9_forecast <- ma(ts_truncated,order=9)
+
+# exponential smoothing
+ets_forecast <- ets(ts_truncated)
+attributes(ets_forecast)
+ets_forecast$mse
+plot(ets_forecast)
+
+#Forecast for 12 months
+forecast_naive <- forecast(naive_forecast, h=12)
+forecast_MA5_forecast <- forecast(MA5_forecast, h=12)
+forecast_MA9_forecast <- forecast(MA9_forecast, h=12)
+forecast_mean <- forecast(mean_forecast, h=12)
+forecast_ets <- forecast(ets_forecast, h=12)
+
+# Plot the forecasts together
+plot(forecast_naive, main="Forecast Comparison", xlab="Time", ylab="Values", col="blue", lwd=2)
+
+# Add the other forecasts to the same plot
+lines(forecast_MA5_forecast$mean, col="red", lwd=2)
+lines(forecast_MA9_forecast$mean, col="green", lwd=2)
+lines(forecast_mean$mean, col="yellow", lwd=2)
+lines(forecast_ets$mean, col="purple", lwd=2)
+
+# Add a legend to differentiate the lines
+legend("topleft", legend=c("Naive Forecast", "MA5 Forecast", "MA9 Forecast","Mean Forecast","exponential smoothing"), 
+       col=c("blue", "red", "green","yellow","purple"), lty=1, lwd=2)
+#Summarizing forecast 
+#choosing RMSE for measuring general accurcay, as it Measures the average magnitude of the errors, giving higher weight to larger errors due to squaring
+summary(forecast_naive)
+#An RMSE of 1.6852 indicates that, on average, the forecasted values deviate from the actual values by approximately 1.69 units. This suggests a moderate level of accuracy in the forecasts, with larger deviations being penalized more heavily.
+summary(forecast_MA5_forecast)
+#The RMSE of 0.1118 indicates that the ETS model is performing well, producing forecasts that closely align with the observed data. The forecasts suggest a relatively stable trend in the coming months, with confidence intervals providing a range for potential values. This model appears effective for capturing the underlying patterns in the data.
+summary(forecast_MA9_forecast)
+#The ETS(M,A,M) model shows a relatively low RMSE of 0.0601,performing better than ma5 forecast,indicating good forecasting accuracy. The forecasts provide a clear view of expected values along with confidence intervals, useful for decision-making.
+summary(forecast_mean)
+#The Mean model with RMSE 2.199101, while simple, fails to provide the same level of accuracy and insight into the variability of the data.
+summary(forecast_ets)
+#The ETS model outperforms the MA9 model , indicating it provides more reliable and accurate forecasts. The ETS method's ability to incorporate trends and seasonality makes it more suitable for time series data with fluctuations, while the MA9 approach is less adaptable and offers poorer predictive performance.
+
+#creating holtz winter model and Forecasting for 12 months
+HW_forecast <- HoltWinters(ts_truncated)
+
+#holtz winter Forecast for 12 months
+forecast_hw <- forecast(HW_forecast, h=12)
+plot(forecast_hw)
+summary(forecast_hw)
+
+#compare with ETS(Exponential Smoothing)
+
+#Error Measures:
+#The Holt-Winters model has a higher RMSE (0.3503) compared to the ETS model (0.3235), indicating better accuracy for ETS.
+#Both models have similar MAPE values, with Holt-Winters at 4.7168% and ETS at 4.5141%.
+
+#Forecast Values:
+#The forecasts for January 2021 show a significant difference: Holt-Winters predicts 12.8841 while ETS predicts 13.0981, with Holt-Winters values tending to fluctuate more.
+#The general trend in Holt-Winters shows lower values in the months following January, especially in February and May compared to ETS.
+
+#Seasonal Component:
+#Holt-Winters includes seasonal adjustments, which may explain the higher variation in the forecasted values across the months compared to the more consistent trend in the ETS model.
+
+#Conclusion and Ranking of Forecasting Models
+#The ETS model appears to provide a slightly more accurate forecast based on RMSE and MAE, while Holt-Winters may be more responsive to seasonal fluctuations. The choice between the two models could depend on the specific needs for accuracy versus the importance of seasonal effects in the data,hence we chose below ranking of models after comparing the indicative summary of all the models and the RMSE of the output
+# 1) Holtz Winter 
+# 2) ETS(exponential Smoothing)
+# 3) Moving average of 9
+# 4) Moving average of 5
+# 5) naive model
+# 6) mean/average forecast
 
 ```
