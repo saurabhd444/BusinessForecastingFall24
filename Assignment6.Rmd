@@ -1,0 +1,100 @@
+---
+title: "Assignment6"
+author: "Saurabh Dudhane"
+date: "2024-10-19"
+output: html_document
+---
+
+```{r}
+
+library(fpp)
+library(fpp2)
+
+file <- ('C:/Users/saura/OneDrive/Desktop/Assignment/BF/Assignment5/flightVolume.csv')
+
+
+#create a Dataframe
+df<-data.frame(read.csv(file))
+head(df)
+
+#create a time series object for Departures 
+values<-c(df$permanent)
+
+
+#create x axis quarters matching with data
+ts <- ts(values, start = c(1980, 1), frequency = 12)
+ts
+#Plot Time series Graph
+plot(ts, main = "Flight Departures Monthly", xlab = "Month", ylab = "Departure Delays", col = "blue", lwd = 2)
+
+#Data from earlier years (1980-2000): This period shows more fluctuation and less consistent upward movement, which may add noise.
+#Hence Truncating the data and keeping only 2000 onwards data for modelling 
+#We also want to exclude data points from 2021 since those are outliers and incomplete and they don't align with the forecasting model 
+
+#Trucated Time series
+ts_truncated<-window(ts,start=c(2000,1),end=c(2020,12))
+ts_truncated
+
+#Plot Time series Graph
+plot(ts_truncated, main = "Flight Departures Monthly", xlab = "Month", ylab = "Departure Delays", col = "blue", lwd = 2)
+acf_plot<-acf(ts_truncated)
+
+print(acf_plot)
+
+#The higher autocorrelation values towards the end could indicate potential seasonal effects or cycles. Analyzing seasonal decomposition   might be beneficial.
+
+#Overall, the autocorrelation analysis suggests a time series with strong persistence and potential seasonal behavior. Further exploration, including tests for trends and seasonality, is a good decision before selecting an appropriate forecasting model.
+
+# Decomposition 1 using decompose()
+decomp_ts<- decompose(ts_truncated)
+# plot using decompose()
+plot(decomp_ts)
+# Each one shows different attributes 
+attributes(decomp_ts)
+seasadj(decomp_ts)
+print(decomp_ts)
+
+# Decomposition 2 using stl
+
+stl_decomp <- stl(ts_truncated,s.window ="periodic")
+plot(stl_decomp)
+attributes(stl_decomp)
+
+# print out a seasonal adjustment
+seasadj(stl_decomp)
+# Plot a line on the graph
+plot(ts_truncated)
+lines(seasadj(stl_decomp), col="Red")
+# Default period forecast
+f_stl <- forecast(stl_decomp)
+# Plotting Decomposition forecast for next 12/24 months
+f_stl <- forecast(stl_decomp,h=12)
+f_stl1 <- forecast(stl_decomp,h=24)
+
+plot(f_stl)
+plot(f_stl1)
+
+#Key Insights of Decomposition
+#Growth Over Time: There is a clear upward trend, indicating increased performance or levels in the measured variable over the years.
+#Seasonality: Monthly patterns remain consistent, which can inform planning and forecasting efforts. January is generally the peak month, #while February tends to see lower values.Clearly there is an additive seasonality in the data
+#Variability: The random fluctuations suggest that while there are stable trends and seasonality, there are also unpredictable factors impacting the data.
+
+
+# Naive
+naive_forecast <- naive(ts_truncated,5)
+plot(naive_forecast)
+# Seasonal Naive
+snaive_forecast <- snaive(ts_truncated,5)
+
+#take Mean of all available history
+
+mean_forecast <- meanf(ts_truncated,5)
+plot(mean_forecast)
+
+
+# Moving Averages
+
+MA5_forecast <- ma(ts_truncated,order=5)
+MA9_forecast <- ma(ts_truncated,order=9)
+
+```
