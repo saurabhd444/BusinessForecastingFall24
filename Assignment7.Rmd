@@ -1,0 +1,98 @@
+---
+title: "Assignment7"
+author: "Saurabh Dudhane"
+date: "2024-10-27"
+output: html_document
+---
+
+```{r }
+library(fpp)
+
+#create a dataframe for Insurace 
+data(insurance)
+length(insurance)
+df<-data.frame(insurance)
+
+#create a time series object for Insurace Quotes 
+values<-c(df$Quotes)
+
+
+#create x axis months matching with data
+ts <- ts(values, start = c(2002, 1), frequency = 12)
+ts
+#Plot Time series Graph
+plot(ts, main = "Monthly Insurace Quotes", xlab = "Month", ylab = "Insurace Quotes", col = "blue", lwd = 2)
+
+#plot ACF
+acf_plot<-acf(ts)
+
+print(acf_plot)
+
+#Summary of initial Analysis of time series
+# The high initial ACF values indicate some short-term dependence between adjacent data points.
+#Lack of Strong Seasonal Pattern: No strong periodic peaks were observed, meaning seasonality is not significant
+# Cyclical Pattern: The switch to negative correlations suggests potential cycles in the data without a long-term trend.
+
+
+#Since we’re working with monthly data (positive values), Mean Absolute Scaled Error (MASE) is a robust measure as it is scaled, making it more interpretable and comparable across different methods.
+
+
+# Decompose the series using STL decomposition
+insurance_decomp <- stl(ts, s.window = "periodic")
+plot(insurance_decomp)
+de_forecast <- forecast(insurance_decomp, h = 12)
+
+# Decomposition 2 using decompose()
+decomp_ts<- decompose(ts)
+# plot using decompose()
+plot(decomp_ts)
+
+
+#Naive
+naive_model <- naive(ts, h = 12)
+
+#Average Method
+mean_model <- meanf(ts, h = 12)
+
+#Exponential Smoothing (ETS)
+ets_model <- ets(ts)
+ets_forecast <- forecast(ets_model, h = 12)
+
+#Holt-Winters Method
+hw_model <- HoltWinters(ts)
+hw_forecast <- forecast(hw_model, h = 12)
+
+
+
+# Display forecasts and confidence intervals
+print(ets_forecast)
+print(hw_forecast)
+plot(ets_forecast, main = "ETS Model Forecast")
+plot(hw_forecast, main = "Holt-Winters Model Forecast")
+
+
+
+# Calculate and Compare accuracy 
+naive_acc <- accuracy(naive_model)
+mean_acc <- accuracy(mean_model)
+ets_acc <- accuracy(ets_forecast)
+hw_acc <- accuracy(hw_forecast)
+de_acc <- accuracy(de_forecast)
+
+
+print(naive_acc)
+print(mean_acc)
+print(ets_acc)
+print(hw_acc)
+print(de_acc)
+
+#The Decomposition model has the lowest MASE (0.3323), indicating it performs better than the naive forecast. The ETS model (0.4471) also shows good performance, while the Holt-Winters (0.5238) and Mean (0.5699) models perform relatively poorer.
+
+#Overall Conclusion and model Rankings
+
+# 1) Use the Decomposition model for future forecasting, as it has the best overall performance across the key accuracy metrics.
+# 2)The ETS model may also be utilized as a reliable alternative, particularly if seasonality is a significant factor in the data.
+# 3)The Holt-Winters and 
+# 4)Mean models should be revisited or refined, as their performance indicates they are less reliable for accurate forecasting for this insurance dataset
+```
+
