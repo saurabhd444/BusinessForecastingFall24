@@ -1,0 +1,279 @@
+---
+title: "MidTerm"
+author: "Saurabh Dudhane"
+date: "2024-11-04"
+output: html_document
+---
+
+```{r}
+# Load Libraries fpp and fpp2
+library(fpp)
+library(fpp2)
+
+# read CSV File
+file <- ('C:/Users/saura/OneDrive/Desktop/Assignment/BF/Midterm/sales.csv')
+
+
+# create an R Dataframe from csv file (Skip Header row)
+df<-data.frame(read.csv(file,header = FALSE, skip = 0))
+
+#create a Sales object for Departures 
+values<-c(df$V2)
+
+
+#create x axis quarters matching with data
+ts <- ts(values, start = c(2020, 1), frequency = 12)
+
+#Plot Time series Graph
+plot(ts, main = "Monthly Sales of Drug Manufacturing", xlab = "Month", ylab = "Sales", col = "blue", lwd = 2)
+
+#Show Min max ,Quartiles for time series
+
+summary(ts)
+
+#boxplot 
+bp<-boxplot(values)
+print(bp)
+# Box plot Summary
+#Minimum: 1322.171
+#First Quartile (Q1): 2848.512
+#Median (Q2): 7246.265
+#Third Quartile (Q3): 14418.802
+#Maximum: 22396.778
+
+
+#Outliers: There are no outliers in the data, as indicated by the absence of any outlier values.
+#Conclusion:
+#The data is positively skewed since the median (7246.265) is closer to the first quartile (2848.512) than the third quartile (14418.802).
+
+
+acf(ts)
+
+
+#ACF Summary
+print(acf(ts))
+
+
+
+#The autocorrelation gradually decrease, with a more noticeable drop after lag 1.41 where it reaches a value of 0.075, suggesting lack of short-term dependence(recent values do not provide much information about future values) after a few lags, the correlation weakens significantly.
+
+#Seasonality / Cyclical Patterns:
+
+#The relatively high autocorrelation at lag 0.8333 (about 9 months) compared to subsequent lags indicates potential seasonality or cyclical behavior, it suggests that  series may exhibit seasonal dependence or periodic trends or Annual Cycles.
+#Analyzing seasonal decomposition   might be beneficial.
+
+
+#Decomposition
+
+# Decompose the series using STL decomposition
+sales_decomp <- stl(ts, s.window = "periodic")
+plot(sales_decomp)
+summary(sales_decomp)
+
+#Decomposition Summary
+#The trend is the most significant contributor to the variation in the data
+#There is significant seasonality in the data, with seasonal fluctuations ranging from -1631.1533 to 1805.6200, contributing to about 20.9% of the total variation
+#Remainder: The residuals show a median close to zero, indicating that most of the variation in the time series has been captured by the seasonal and trend components
+#which indicates that the model captures most of the variation in the time series, leaving only a small amount of unexplained noise.
+
+#Given the fact that the seasonal component does not appear to vary proportionally with the trend, and the seasonal effects remain constant in size relative to the level of the data, it suggests that the time series is additive, not  multiplicative.
+
+
+
+# print out a seasonal adjustment
+seasadj(sales_decomp)
+# Plot a line on the graph
+plot(ts)
+lines(seasadj(sales_decomp), col="Red")
+ #For which month is the time series value high, and for which month is it low?  
+#Can you think of the reason behind the high and low values in those months? 
+
+#The relatively high autocorrelation at lag 0.8333 (about 9-10 months)
+#Especially its a holiday season and fall season,people easily catch flu and cold due to junk food and weather changes
+
+#there are seasonal Fluctuations but not Major ones
+
+# Naive
+naive_forecast <- naive(ts,12)
+plot(naive_forecast)
+
+# Generate residuals from Naive forecast
+residuals_naive <- naive_forecast$residuals
+
+# 1 Plot residuals
+plot(residuals_naive, type = "o", main = "Residuals Plot", ylab = "Residuals", xlab = "Time")
+#Residuals plot is catching systematic pattern of data this suggests that the naive model is not capturing some important aspect of the data, such as a trend or seasonality.
+# 2 Histogram of residuals
+hist(residuals_naive, main = "Histogram of Residuals", xlab = "Residuals", col = "lightblue", border = "black", breaks = 20)
+
+#As Naive forecast is failed to capture trend and seasonality
+#the differences between consecutive observations might resemble a normal distribution
+
+# Fitted values from Naive forecast
+fitted_values_naive <- naive_forecast$fitted
+
+#3 Plot fitted values vs residuals
+plot(fitted_values_naive, residuals_naive, main = "Fitted Values vs. Residuals", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+# Actual values of the time series
+actual_values <- ts
+
+# 4 Plot actual values vs residuals
+plot(actual_values, residuals_naive, main = "Actual Values vs. Residuals", xlab = "Actual Values", ylab = "Residuals")
+abline(h = 0, col = "red") 
+
+# Both The plots 3 and 4 showing residuals are larger for higher values of the actual time series, this suggests that the model may not be appropriately capturing the relationship between actual and predicted values
+
+# 5 ACF of residuals
+# Remove missing values from the residuals before applying ACF
+residuals_naive <- na.omit(naive_forecast$residuals)
+
+# Now compute the ACF of the residuals
+acf(residuals_naive)
+
+#ACF shows spikes at certain lags, it indicates that there is autocorrelation in the residuals, suggesting that the model has missed some pattern in the data (like seasonality or trend).
+
+#forecast Naive
+forecast_naive <- forecast(naive_forecast, h=12)
+plot(forecast_naive)
+#Summary of Naive to print error measures
+summary(forecast_naive)
+# naive forecast is flat 10151.93 for the next year..It has failed miserably to capture error trend and Seasonality
+
+
+# Moving Averages
+
+MA3_forecast <- ma(ts,order=3)
+MA6_forecast <- ma(ts,order=6)
+MA9_forecast <- ma(ts,order=9)
+
+# Plot the original time series
+plot(ts, type = "l", col = "black", lwd = 2, 
+     main = "Time Series with Simple Moving Averages", 
+     xlab = "Time", ylab = "Values")
+
+# Add the SMAs to the plot
+lines(MA3_forecast, col = "red", lwd = 2)  # SMA order 3 in Red
+lines(MA6_forecast, col = "blue", lwd = 2)  # SMA order 6 in Blue
+lines(MA9_forecast, col = "green", lwd = 2)  # SMA order 9 in Green
+
+# Add a legend
+legend("topleft", legend = c("Time Series", "SMA (3)", "SMA (6)", "SMA (9)"), 
+       col = c("black", "red", "blue", "green"), lty = 1, lwd = 2)
+
+#forecasting MA3
+forecast_MA3_forecast <- forecast(MA3_forecast, h=12)
+
+# Plot the forecasts together and print summary
+plot(forecast_naive, main="Forecast Comparison", xlab="Time", ylab="Values", col="blue", lwd=2)
+
+# Add the other forecasts to the same plot
+lines(forecast_MA3_forecast$mean, col="red", lwd=2)
+
+summary(forecast_MA3_forecast)
+
+#SMA-6 and SMA-9 provide increasing levels of smoothing, which help identify longer-term trends and reduce noise but at the expense of responsiveness to short-term fluctuations.To forecast future values based on a weighted average of past values by passing varying weights to the observations we continue with est(simple exponential smoothing ) now
+
+#simple Exponential smoothing
+library(forecast)
+# Perform the SES forecast using the ses() function
+ses_forecast <- ses(ts, h = 12) 
+
+# Print the alpha value (smoothing parameter)
+summary(ses_forecast)
+
+##   Smoothing parameters:
+##     alpha = 0.4319 
+## 
+##   Initial states:
+##     l = 1472.029 
+## 
+##   sigma:  2603.101
+
+#An alpha of 0.4319 means that the model is assigning 43.19% weight to the most recent data point, while the remaining 56.81% is assigned to the historical average of the series. This indicates a relatively moderate weight on recent data, meaning the forecast is moderately influenced by the latest observation but still accounts for historical trends
+
+#The initial state represents the starting level of the series, from which forecasts begin. It is derived from the early values of the time series and serves as the baseline level for forecasting. In this case, the initial level is 1472.029.
+
+#A higher sigma value (2603.101) means that the errors or deviations from the forecasted values are relatively large, suggesting that there may be a significant amount of noise or variability in the data  which  ses failed to capture
+
+# Plot residuals
+plot(residuals(ses_forecast), main = "Residuals of ETS Forecast", ylab = "Residuals", xlab = "Time")
+#there are patterns in the plot (e.g., trends, cycles, the model may not have fully captured some aspect of the data.
+
+# Histogram of residuals
+hist(residuals(ses_forecast), main = "Histogram of Residuals", xlab = "Residuals", breaks = 15)
+#some Skewness in the data which  could indicate model misspecification, and the forecast might be less reliable.
+
+# Fitted values vs. residuals
+plot(fitted(ses_forecast), residuals(ses_forecast), main = "Fitted Values vs. Residuals", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+# Actual values vs. residuals
+plot(ts, residuals(ses_forecast), main = "Actual Values vs. Residuals", xlab = "Actual Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+#for fitted and actual residuals plot there is some pattern for few data points which would indicate that the model is not fitting the data well
+
+acf(residuals(ses_forecast), main = "ACF of Residuals")
+#ACF shows spikes at certain lags, it indicates that there is autocorrelation in the residuals, suggesting that the model is less reliable
+
+# Print accuracy measures
+accuracy(ses_forecast)
+
+#Forecast for August 2025 using SES:
+#Point Forecast: 14075.16
+#This is the central forecast value for August 2025.
+
+#Confidence Intervals for August 2025:
+#80% Confidence Interval: The forecast for August 2025 is expected to fall between 8247.23 and 19903.09 with 80% confidence.
+#95% Confidence Interval: The forecast for August 2025 is expected to fall between 5162.10 and 22988.22 with 95% confidence.
+
+#Holtz Winter
+#creating holtz winter model and Forecasting for 12 months
+HW_forecast <- HoltWinters(ts)
+
+#holtz winter Forecast for 12 months
+forecast_hw <- forecast(HW_forecast, h=12)
+plot(forecast_hw)
+summary(forecast_hw)
+## Smoothing parameters:
+##  alpha: 0.1141222
+##  beta : 1
+##  gamma: 0.9895402
+#A smaller alpha indicates that the model is less sensitive to recent changes, and more emphasis is placed on historical data.
+
+#beta : 1 This indicates that the model assumes the trend is completely influenced by the most recent data, and it directly incorporates the latest change in the series' trend.
+##  gamma: 0.9895402 This indicates that the model responds very strongly to recent seasonal patterns, updating based on the latest data. This suggests that the seasonal effect is highly adaptive to recent patterns in the data.
+
+# Plot residuals
+plot(residuals(forecast_hw), main = "Residuals of Holtz Winter Forecast", ylab = "Residuals", xlab = "Time")
+#there is no clear pattern in the plot the model has  fully captured some aspect of the data.
+
+# Histogram of residuals
+hist(residuals(forecast_hw), main = "Histogram of Residuals", xlab = "Residuals", breaks = 15)
+#Residual are normally distributed showing a bell-shaped curve centered around 0.
+#indicating model good fit
+
+# Fitted values vs. residuals
+plot(fitted(forecast_hw), residuals(ses_forecast), main = "Fitted Values vs. Residuals", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+# Actual values vs. residuals
+plot(ts, residuals(forecast_hw), main = "Actual Values vs. Residuals", xlab = "Actual Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+#for fitted and actual residuals plot points are scattered randomly showing good fit model
+
+#MAE gives the average absolute difference between the actual and forecasted sales in the same units (dollars) as the original sales data.
+accuracy(forecast_hw)
+#MAE: 1679.95 indicates the forecast is off by around $1,680 on average.
+accuracy(ses_forecast)
+#MAE: 1608.26 is a bit smaller than the Holt-Winters MAE, but still quite large, meaning the SES model is off by around $1,608 on average.
+accuracy(naive_forecast)
+#MAE: 503.06 is the smallest MAE, meaning that on average, the model is off by just $503.06.
+accuracy(forecast_MA3_forecast)
+#MAE: 503.06 is the smallest MAE, meaning that on average, the model is off by just $503.06.
+
+#In conclusion, for this time series, Moving Average (MA3) is the most accurate model, followed by Simple Exponential Smoothing and Holt-Winters. The Naive forecast is not a good fit for this dataset and should likely be avoided.
+```
