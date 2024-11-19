@@ -26,10 +26,22 @@ summary(lm_fit)
 
 #using summary we can see that |p| value is significantly high for Average.Wind.Direction..Day. and Average.Barometric.Pressure..Period. so we have to exclude these features and re implement the model
 
+
 lm_fit_new<-lm(Power.Generated ~ Day.of.Year + Year + Is.Daylight + Distance.to.Solar.Noon +  Average.Temperature..Day.  +   Average.Wind.Speed..Day. + Sky.Cover + Relative.Humidity + 
     Average.Wind.Speed..Period. , data=df)
 
 summary(lm_fit_new)
+#New chosen model shows good F-statistic: 686.8 and R Squared better than the previous one 
 
+# Generate residuals vs fitted plot
+plot(lm_fit_new, which = 1)
+#suggests that the residuals has constant variance and the model fits the data well.
+
+#histogram of residuals
+hist(residuals(lm_fit_new), main="Histogram of Residuals", xlab="Residuals", breaks=20)
+#The histogram  resemble a bell-shaped curve or normal distribution with a peak at 0 and symmetrical tails on either side. This suggests that the residuals are approximately normally distributed, which is a desirable condition for linear regression.
+# Q-Q plot
+plot(lm_fit_new, which = 2)
+# QQ PLOT shows residuals around the regressions lines which indicates that the residuals are normally distributed which is an assumption of linear regression.
 ```
 
