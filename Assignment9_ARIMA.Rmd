@@ -1,0 +1,67 @@
+---
+title: "Assignment9_ARIMA"
+author: "Saurabh Dudhane"
+date: "2024-11-22"
+output: html_document
+---
+
+```{r}
+
+library(fpp)
+library(fpp2)
+library(forecast)
+
+file <- ('C:/Users/saura/OneDrive/Desktop/Assignment/BF/Assignment4/Power Generation.csv')
+#file has quarterly data on thermal power generation in KW (using Coal as the raw material) from 2001 to 2020(80 quarters)
+
+
+#create a Dataframe
+df<-data.frame(read.csv(file))
+head(df)
+#create a time series object for power generation
+values<-c(df$Power.Generated.Using.Coal)
+values
+#create x axis quarters matching with data
+ts <- ts(values, start = c(2001, 1), frequency = 4)
+ts
+#Plot Time series Graph
+plot(ts, main = "Quarterly Power Generation from Coal", xlab = "Year", ylab = "Power in KW", col = "blue", lwd = 2)
+#check integration / differentiation parameter d and D
+nsdiffs(ts)
+ndiffs(ts)
+
+#fitting the model
+fit <- auto.arima(ts,trace=TRUE, stepwise = FALSE )
+#Best model: ARIMA(2,1,2)(0,1,1)[4] however we chose ARIMA(0,1,3)(0,1,1)[4] since it has less number of features with same AIC 
+
+# Fit the model ARIMA(2,1,2)(0,1,1)[4] manually
+manual_fit <- Arima(ts, order = c(0, 1, 3), seasonal = list(order = c(0, 1, 1), period = 4))
+
+#Summary of both ARIMA models
+summary(fit)
+summary(manual_fit)
+#the MAPE value indicates that the model is fairly accurate, with a prediction error of around 5.15%.
+
+#Residual Analysis
+Acf(manual_fit$residuals)
+#The autocorrelation values  fluctuating around zero with no noticeable patterns and no significant auto-correlated errors which indicates a good fit model
+Box.test(residuals(manual_fit), lag=20, type="Ljung")
+#Since the p-value is large (0.2724), we conclude that the residuals do not show significant autocorrelation at lags 1 through 20. This is a good sign, as it indicates that the model has captured the underlying temporal dependencies in the data, and the residuals behave like white noise
+plot.ts(residuals(manual_fit))
+hist(manual_fit$residuals)
+#histogram resembles the bell-shaped curve of a normal distribution. This suggests that the model has appropriately captured the underlying patterns in the data.
+tsdiag(manual_fit)
+
+#forecast using ARIMA
+fcast<-forecast(manual_fit,h=5)
+plot(fcast)
+summary(fcast)
+#the MAPE value indicates that the forecast is fairly accurate, with a prediction error of around 5.15%.
+
+
+#plot the original time series along with forecasted model
+plot(ts)
+lines(fitted(fcast),col='blue')
+#We can see the model is fairly accurate as its aligning with the original time series
+```
+
