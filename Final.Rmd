@@ -1,0 +1,540 @@
+---
+title: "Final Exam"
+author: "Saurabh Dudhane"
+date: "2024-12-09"
+output: html_document
+---
+
+```{r}
+library(fpp)
+library(fpp2)
+
+# 1) Correctly import the data.
+
+# read CSV File
+file <- ('C:/Users/saura/OneDrive/Desktop/Assignment/BF/Midterm/TOTALSA.csv')
+
+
+# create an R Dataframe from csv file (Skip Header row)
+df<-data.frame(read.csv(file,header = FALSE, skip = 1))
+df
+
+#create a Sales object for car sales 
+values<-c(df$V2)
+
+#create x axis quarters matching with data
+ts <- ts(values, start = c(2019, 1), frequency = 12)
+
+# 2) Show a time series plot. 
+
+#Plot Time series Graph
+plot(ts, main = "Total Monthly car Sales ", xlab = "Month", ylab = "Sales", col = "blue", lwd = 2)
+
+# 3) Please summarize your observations of the time series plot
+
+#The sharp decline and subsequent fluctuation in car sales during the first half of 2020 were primarily driven by the COVID-19 pandemic. 
+
+#Initial Decline was primary  due to 
+
+#Lockdowns and Factory Shutdowns
+#Economic Uncertainty
+#Reduced Consumer Demand
+
+
+#Subsequent Fluctuations are due to 
+
+#Pent-Up Demand
+#Supply Chain Disruptions
+#Shifting Consumer Preferences
+
+#sales started to follow Gradual Normalization in 1st/2nd quarter of 2022 hence only taking the limited data for our prediction 
+#create new x axis quarters matching with data
+ts_new <- window(ts, start = c(2022, 1))
+
+# 4) Show a time series plot. 
+
+#Plot Time series Graph of new data 
+plot(ts_new, main = "Total Monthly car Sales ", xlab = "Month", ylab = "Sales", col = "blue", lwd = 2)
+
+# 5) What are the min, max, mean, median, 1st, and 3rd Quartile values of the times series? 
+#Show Min max ,Quartiles for time series
+
+
+
+#Summary of Statistics:
+#Minimum (Min.): 13.87
+#1st Quartile (1st Qu.): 15.00
+#Median: 15.73
+#Mean: 15.48
+#3rd Quartile (3rd Qu.): 16.19
+#Maximum (Max.): 16.45
+
+# 6) Show the box plot. 
+#boxplot 
+bp<-boxplot(ts_new)
+
+# 7) Can you summarize your observation about the time series from the summary stats and box plot? 
+print(bp)
+#The box plot  shows:
+
+#The box spanning from 15.00 (1st Qu.) to 16.19 (3rd Qu.) with a line at the median (15.73).
+#Whiskers extending from the minimum value (13.87) to the maximum value (16.45).
+#No outliers.
+#The median (15.73) is slightly higher than the mean (15.48), indicating that the data might be slightly skewed to the left (since the mean is lower than the median).
+#The range (Max - Min) is 16.45 - 13.87 = 2.58, indicating a relatively small spread in the data.
+#The interquartile range (IQR, which is the difference between the 3rd quartile and the 1st quartile) is 16.19 - 15.00 = 1.19, showing the middle 50% of the data is concentrated within a narrow range.
+
+#Decomposition
+
+# 8) Plot the decomposition of the time series.
+
+# Decompose the series using STL decomposition
+sales_decomp <- stl(ts_new, s.window = "periodic")
+plot(sales_decomp)
+summary(sales_decomp)
+
+# 9) Is the time series seasonal?
+
+#Yes, the time series is seasonal,  the seasonal component explains a  portion of the overall variation (11.3%) and also see a pattern in the stl decomposed seasonal component
+
+
+#10) Is the decomposition additive or multiplicative? 
+#Based on the provided STL decomposition, the decomposition appears to be additive because:
+
+#The seasonal and remainder components are represented as values that are added to the trend (rather than being multiplied by the trend).
+
+
+#11) If seasonal, what are the values of the seasonal monthly indices? 
+#Monthly seasonal indexes fluctuating and ranging from 0.4 to -0.4 
+
+#12) For which month is the time series value high, and for which month is it low? 
+#sales are high during Summer Months (April to July)and 
+#End of the Year (October to November)
+#and low during January and February
+
+
+#13) Can you think of the reason behind the high and low values in those months?
+
+#(March to July)
+#The spring months of March and April also see increased sales, as consumers are more likely to shop for cars when the weather improves.
+#Tax Refunds: Many buyers use their tax refunds to make major purchases like vehicles during these months.
+#October to December are typically the strongest months for car sales in the U.S. due to several factors:
+#Holiday Sales Events: Many dealerships have promotions around Black Friday and other end-of-year sales events, which boost consumer spending.
+#New Model Year Arrivals: Automakers often release new models in the fall, which can attract more buyers.
+
+#January and February typically have lower sales, largely due to the winter weather and the lack of major sales events. Consumer spending is also generally slower after the holidays
+
+
+#14) Show the plot for time series adjusted for seasonality.
+seasadj(sales_decomp)
+
+
+#15 ) Overlay this with the line for actuals? Does seasonality have big fluctuations in the value of time series? 
+# Plot a line on the graph
+plot(ts_new)
+lines(seasadj(sales_decomp), col="Red")
+
+#No Seasonality does not have any big fluctuation as seasadj adjusted it very well 
+
+#Naïve Method
+
+# 16 ) Output 
+# Naive
+naive_forecast <- naive(ts_new,12)
+plot(naive_forecast)
+
+#Perform Residual Analysis for this technique. 
+residuals_naive <- naive_forecast$residuals
+#17) Do a plot of residuals. What does the plot indicate?
+plot(residuals_naive, type = "o", main = "Residuals Plot", ylab = "Residuals", xlab = "Time")
+#Residuals plot is catching systematic pattern of data this suggests that the naive model is not capturing some important aspect of the data, such as a trend or seasonality.
+
+
+#18 ) Do a Histogram plot of residuals. What does the plot indicate?
+hist(residuals_naive, main = "Histogram of Residuals", xlab = "Residuals", col = "lightblue", border = "black", breaks = 20)
+#Histogram is non normal suggesting transformation of the data or a different model could be necessary.
+
+#19) Do a plot of fitted values vs. residuals. What does the plot indicate? 
+fitted_values_naive <- naive_forecast$fitted
+plot(fitted_values_naive, residuals_naive, main = "Fitted Values vs. Residuals", xlab = "Fitted Values", ylab = "Residuals")
+#funnel shape (residuals increasing or decreasing with fitted values) we might need to use a different model or apply transformations to stabilize variance.
+abline(h = 0, col = "red")
+
+#20) Do a plot of actual values vs. residuals. What does the plot indicate?
+actual_values <- ts_new
+
+
+#  Plot actual values vs residuals
+plot(actual_values, residuals_naive, main = "Actual Values vs. Residuals", xlab = "Actual Values", ylab = "Residuals")
+abline(h = 0, col = "red") 
+
+#there is a discernible pattern or trend, it indicates that the model is not fully capturing some aspect of the actual data, and further model refinement may be necessary.
+
+#20 ) Do an ACF plot of the residuals? What does this plot indicate?
+# Now compute the ACF of the residuals
+# Remove missing values from the residuals before applying ACF
+residuals_naive <- na.omit(naive_forecast$residuals)
+acf(residuals_naive)
+
+# there are significant spikes at few lags, it suggests that the model has not captured the temporal structure properly
+
+#21 ) Print the five measures of accuracy for this forecasting technique
+# Compute the accuracy measures
+
+accuracy_measures <- accuracy(naive_forecast)
+
+# Print the accuracy measures
+print(accuracy_measures)
+
+#22) Time series value for next year. Show table and plot
+#forecast Naive
+
+forecast_naive <- forecast(naive_forecast, h=12)
+plot(forecast_naive)
+#Summary of Naive to print error measures
+summary(forecast_naive)
+
+#23 ) How good is the accuracy?
+#24) What does it predict the time series value will be in one year?
+#25)Other observation
+
+
+#Simple Moving Averages
+#26) Plot the graph for the time series. 
+
+plot(ts_new)
+MA3_forecast <- ma(ts_new,order=3)
+MA6_forecast <- ma(ts_new,order=6)
+MA9_forecast <- ma(ts_new,order=9)
+#27)Show the Simple Moving average of order three on the plot above in Red
+# Add the SMAs to the plot
+lines(MA3_forecast, col = "red", lwd = 2)  # SMA order 3 in Red
+#28)Show the Simple Moving average of order six on the plot above in Blue
+lines(MA6_forecast, col = "blue", lwd = 2)  # SMA order 6 in Blue
+#29)how the Simple Moving average of order nine on the plot above in Green
+lines(MA9_forecast, col = "green", lwd = 2)  # SMA order 9 in Green
+
+# Add a legend
+legend("topleft", legend = c("Time Series", "SMA (3)", "SMA (6)", "SMA (9)"), 
+       col = c("black", "red", "blue", "green"), lty = 1, lwd = 2)
+#30)(Bonus) show the forecast for the next 12 months using one of the simple average orders that you feel works best for time series
+
+
+#forecasting MA9
+forecast_MA9_forecast <- forecast(MA9_forecast, h=12)
+
+# Plot the forecasts together and print summary
+plot(forecast_naive, main="Forecast Comparison", xlab="Time", ylab="Values", col="blue", lwd=2)
+
+# Add the other forecasts to the same plot
+lines(forecast_MA9_forecast$mean, col="red", lwd=2)
+
+summary(forecast_MA9_forecast)
+
+#31)What are your observations of the plot as the moving average order goes up? 
+
+
+#SMA-6 and SMA-9 provide increasing levels of smoothing, which help identify longer-term trends and reduce noise but at the expense of responsiveness to short-term fluctuations.To forecast future values based on a weighted average of past values by passing varying weights to the observations we continue with est(simple exponential smoothing ) now
+
+#Simple Smoothing
+
+#32) Perform a simple smoothing forecast for the next 12 months for the time series. 
+#simple Exponential smoothing
+library(forecast)
+# Perform the SES forecast using the ses() function
+ses_forecast <- ses(ts_new, h = 12) 
+summary(ses_forecast)
+
+
+##   Smoothing parameters:
+##     alpha = 0.5558 
+## 
+##   Initial states:
+##     l = 14.5655 
+## 
+##   sigma:  0.5893
+
+#33) What is the value of alpha?  What does that value signify? 
+
+#Value: 0.5558
+
+#A value of 0.5558 indicates that the most recent observation contributes 55.58% to the forecast, and the remaining 44.42% is influenced by the previous smoothed values.
+
+
+#34) What is the value of the initial state? 
+
+# the initial state is 14.5655, which is the starting value used in the exponential smoothing process.
+
+#35) What is the value of sigma?  What does the sigma signify?
+
+#A sigma value of 0.5893 suggests that the residuals have an average deviation of 0.5893 units from the forecasted values. This reflects how much variability there is in the residuals.
+
+#Perform Residual Analysis for this technique. 
+#36) Do a plot of residuals. What does the plot indicate?
+
+plot(residuals(ses_forecast), main = "Residuals of ETS Forecast", ylab = "Residuals", xlab = "Time")
+#The residuals plot reveals a consistent pattern in the data, implying that the Simple Smoothing model might be overlooking important features, such as trend or seasonality
+
+#37) Do a Histogram plot of residuals. What does the plot indicate?
+hist(residuals(ses_forecast), main = "Histogram of Residuals", xlab = "Residuals", breaks = 15)
+#The histogram deviates from a normal distribution, indicating that a data transformation or alternative model might be needed.
+
+#38) Do a plot of fitted values vs. residuals. What does the plot indicate? 
+plot(fitted(ses_forecast), residuals(ses_forecast), main = "Fitted Values vs. Residuals", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+#The funnel-shaped pattern, where residuals increase or decrease with the fitted values, suggests that a different model or transformation may be required to stabilize the variance.
+
+#39) Do a plot of actual values vs. residuals. What does the plot indicate?
+plot(ts, residuals(ses_forecast), main = "Actual Values vs. Residuals", xlab = "Actual Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+#A visible trend or pattern in the residuals suggests that the model is not fully accounting for certain aspects of the data, indicating a need for further model adjustments.
+#40) Do an ACF plot of the residuals? What does this plot indicate?
+acf(residuals(ses_forecast), main = "ACF of Residuals")
+#The noticeable spikes at certain lags imply that the model has not accurately captured the temporal structure, suggesting room for improvement.
+
+#41)Print the five measures of accuracy for this forecasting technique
+
+# Compute the accuracy measures
+
+accuracy_measures <- accuracy(ses_forecast)
+
+# Print the accuracy measures
+print(accuracy_measures)
+#Forecast 
+#Time series value for next year. Show table and plot
+forecast_ses<-forecast(ses_forecast ,h=12)
+
+plot(forecast_ses)
+#Summary of Naive to print error measures
+summary(forecast_ses)
+
+#42)Summarize this forecasting technique
+#43)How good is the accuracy?
+#44)What does it predict the time series value will be in one year?
+#45)Other observation
+
+
+#Holtz Winter
+#46)Perform Holt-Winters forecast for the next 12 months for the time series. 
+
+#creating holtz winter model and Forecasting for 12 months
+HW_forecast <- HoltWinters(ts_new)
+
+#holtz winter Forecast for 12 months
+forecast_hw <- forecast(HW_forecast, h=12)
+plot(forecast_hw)
+summary(forecast_hw)
+
+## Smoothing parameters:
+##  alpha: 0.3930715
+##  beta : 0
+##  gamma: 0
+## 
+## Coefficients:
+##             [,1]
+## a   16.320274733
+## b    0.161507867
+## s1   0.069798611
+## s2   0.732590278
+## s3   0.154590278
+## s4   0.481965278
+## s5  -0.433284722
+## s6  -0.322326389
+## s7  -0.362034722
+## s8   0.460465278
+## s9  -0.081993056
+## s10 -1.105868056
+## s11  0.407715278
+## s12 -0.001618056
+## 
+## Error measures:
+##                       ME      RMSE       MAE         MPE     MAPE      MASE
+## Training set 0.005262362 0.8045032 0.5856619 0.004108308 3.699873 0.3679606
+##                     ACF1
+## Training set -0.07687174
+
+
+
+#47)What is the value of alpha?  What does that value signify? #A value of 0.3931 indicates that recent observations are given moderate importance in determining the level component of the time series. A smaller alpha would give more weight to past data.
+
+#48)What is the value of beta? What does that value signify?
+
+#Beta represents the smoothing parameter for the trend in the time series. A value of 0 suggests that the model does not account for any trend in the data. This indicates that the data is assumed to have no trend component, and the model is only capturing the level and seasonality.
+
+#49)What is the value of gamma? What does that value signify?
+#A gamma of 0 suggests that the seasonal variations in the data are either very minimal or not considered important for the forecast.
+
+#50)What is the value of initial states for the level, trend, and seasonality? What do these values signify? 
+#Initial Level (a) = 16.3203
+#This is the starting point or baseline value for the time series, which the model uses to begin its forecasting process.
+#Initial Trend (b) = 0.1615
+#This represents the initial estimate of the trend in the data. Since beta is 0, this value is less relevant in this model, as no trend is considered.
+#Initial Seasonal Components (s1, s2, ..., s12):
+#These values represent the initial seasonal factors for each month (12 months total). They capture the seasonal fluctuations in the data, with each value corresponding to a specific month in the seasonal cycle.
+
+#51)What is the value of sigma?  What does the sigma signify?
+#A sigma of 0.8045 indicates that the residuals (errors between the forecast and actual values) have a standard deviation of approximately 0.8045, which suggests how much the forecasts are expected to deviate from actual values.
+
+#52)Do a plot of residuals. What does the plot indicate?
+# Plot residuals
+plot(residuals(forecast_hw), main = "Residuals of Holtz Winter Forecast", ylab = "Residuals", xlab = "Time")
+##The residuals plot displays a clear trend, suggesting that the Holt-Winters model might be missing significant elementss.
+
+#53) Do a Histogram plot of residuals. What does the plot indicate?
+# Histogram of residuals
+hist(residuals(forecast_hw), main = "Histogram of Residuals", xlab = "Residuals", breaks = 15)
+#The histogram does not follow a normal distribution, which implies that a transformation of the data or a different modeling approach might be necessary.
+
+#54) Do a plot of fitted values vs. residuals. What does the plot indicate? 
+# Fitted values vs. residuals
+plot(fitted(forecast_hw), residuals(ses_forecast), main = "Fitted Values vs. Residuals", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+#The funnel-shaped distribution of residuals, where they increase or decrease with fitted values, points to the potential need for a different model or transformation to address variance instability.
+#55) Do a plot of actual values vs. residuals. What does the plot indicate?
+
+
+# Actual values vs. residuals
+plot(ts, residuals(forecast_hw), main = "Actual Values vs. Residuals", xlab = "Actual Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+#The presence of a pattern or trend in the residuals indicates that the Holt-Winters model has not captured all relevant aspects of the data, signaling that further adjustments are needed.
+
+#56) Do an ACF plot of the residuals? What does this plot indicate?
+
+residuals_hw <- na.omit(forecast_hw$residuals)
+acf(residuals_hw, main = "ACF of Residuals")
+
+#There are less prominent spikes in the residuals at each lags it has less autocorrelated errors
+# Compute the accuracy measures
+
+#57) Print the five measures of accuracy for this forecasting technique
+accuracy_measures <- accuracy(forecast_hw)
+
+# Print the accuracy measures
+print(accuracy_measures)
+
+
+#58)Time series value for next year. Show table and plot Summarize this forecasting technique
+#Forecast 
+
+plot(forecast_hw)
+#Summary of Naive to print error measures
+summary(forecast_hw)
+
+#59)How good is the accuracy?
+#60)What does it predict the time series value will be in one year?
+#61)Other observation
+
+#ARIMA or Box-Jenkins
+
+#62) Is Time Series data stationary? How did you verify? Please post the output from one of the tests. 
+#check integration / differentiation parameter d and D
+nsdiffs(ts_new)
+ndiffs(ts_new)
+#nsdiff is 0
+#it means that we do not need to remove seasonality, and the data does not exhibit any strong seasonal pattern.
+#ndiff is 1
+#it means the series has a trend that needs to be removed by differencing once to make it stationary.
+
+#63)How many differences are needed to make it stationary?
+#1
+
+#64)Is a Seasonality component needed?
+#nsdiffs() = 0 implies that the time series does not require seasonal differencing, meaning there is no significant seasonality that needs to be addressed through differencing.
+
+#65)Plot the Time Series chart of the differenced series. 
+ndiffs_value <- ndiffs(ts_new)
+diff_ts_new <- diff(ts_new, differences = ndiffs_value)
+
+
+plot(diff_ts_new, main = "Differenced Time Series of Car Sales", xlab = "Month", ylab = "Differenced Sales", col = "red", lwd = 2)
+
+#66)Plot the ACF and PACF plots of the differenced series. 
+acf(diff_ts_new, main = "ACF of Differenced Series")
+pacf(diff_ts_new, main = "PACF of Differenced Series")
+
+#67)Based on the ACF and PACF, which are the possible ARIMA models? 
+#Model suggested by auto_Arima is as below
+#ARIMA(3,1,0)    : 46.77066
+
+
+#68) Show the AIC, BIC, and Sigma^2 for the possible models
+
+
+#AIC (Akaike Information Criterion) = 44.77: AIC is used to compare different models; the lower the AIC, the better the model fits the data.
+#AICc (corrected AIC) = 46.77: This is the AIC with a correction for small sample sizes.
+#BIC (Bayesian Information Criterion) = 49.65: BIC is another criterion used to compare models, with a preference for simpler models. Like AIC, lower BIC values are preferred.
+#sigma^2 = 0.278 This represents the variance of the residuals (errors), which is a measure of the variability in the time series that the model did not explain. A smaller value of sigma^2 indicates that the model fits the data well.
+
+
+#69)Based on the above AIC, BIC, and Sigma^2 values, which model will you select? 
+#ARIMA(3,1,0)    : 46.77066
+
+#70) What is the final formula for ARIMA with the coefficients? 
+#ar1 = -0.4560
+#ar2 = -0.1214
+#ar3 = 0.4010 These are the estimated coefficients for the autoregressive terms. They represent the relationships between the current value and the previous values of the time series. Specifically:
+#The first AR term (ar1) suggests that the value at time 𝑡
+#t is negatively influenced by the value at time t−1.
+#The second AR term (ar2) indicates a weaker negative influence from the value at time t−2.
+#The third AR term (ar3) suggests a positive influence from the value at time t−3.
+
+#final formula
+#y t=y (t−1)−0.4560(y (t−1)−y (t−2))−0.1214(y (t−2)−y (t−3))+0.4010(y(t−3)−y(t−4))+e (t)
+
+
+fit <- auto.arima(ts_new,trace=TRUE, stepwise = FALSE )
+summary(fit)
+
+#71) Do a plot of residuals. What does the plot indicate?
+# Plot residuals
+plot(residuals(fit), main = "Residuals of ARIMA Forecast", ylab = "Residuals", xlab = "Time")
+
+#Plot indicates no pattern in data model has captured most of the variance in the data
+
+#72)Do a Histogram plot of residuals. What does the plot indicate?
+#Histogram
+hist(fit$residuals)
+
+
+#errors are normally distributed indicated good fit
+
+# Fitted values vs. residuals
+plot(fitted(fit), residuals(ses_forecast), main = "Fitted Values vs. Residuals", xlab = "Fitted Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+
+# Actual values vs. residuals
+plot(ts, residuals(fit), main = "Actual Values vs. Residuals", xlab = "Actual Values", ylab = "Residuals")
+abline(h = 0, col = "red")
+#for fitted and actual residuals plot points are scattered randomly showing good fit model
+
+
+#ACF plot
+Acf(fit$residuals)
+#no Autocorreltead errors indicate model perfect fit 
+
+
+#Print the five measures of accuracy for this forecasting technique.
+#Forecast 
+#Next one year. Show table and plot
+#Next two years. Show table and plot
+#Summarize this forecasting technique
+#How good is the accuracy?
+#What does it predict time series will be in one year and the next two years?
+#Other observation
+
+
+#forecast using ARIMA 1 year
+fcast<-forecast(fit,h=12)
+plot(fcast)
+summary(fcast)
+#forecast using ARIMA 2 years
+fcast1<-forecast(fit,h=24)
+plot(fcast1)
+summary(fcast1)
+
+
+accuracy(fcast)
+
+#the MAPE value indicates that the forecast is fairly accurate, with a prediction error of around 2.48 which is the lowest %.
+```
+
