@@ -195,8 +195,15 @@ plot(forecast_naive)
 summary(forecast_naive)
 
 #23 ) How good is the accuracy?
+#Mape is 3.411387 which is average 
+
 #24) What does it predict the time series value will be in one year?
+#point forecast is  16.191        
+#13.30585-19.07615 80 % CI 
+
+#11.77854 20.60346 95 % CI
 #25)Other observation
+#N/A
 
 
 #Simple Moving Averages
@@ -309,10 +316,17 @@ plot(forecast_ses)
 summary(forecast_ses)
 
 #42)Summarize this forecasting technique
+#A moving average (MA) is a commonly used time series forecasting method that smooths a dataset by creating averages of different subsets of the full dataset. The method helps to reduce the noise in the data and highlight underlying trends or patterns by averaging values over a specified window of time.
 #43)How good is the accuracy?
-#44)What does it predict the time series value will be in one year?
-#45)Other observation
 
+#MAPE is 2.88% which is good as compared to Naive
+#44)What does it predict the time series value will be in one year?
+
+#16.0236 is the point forecast
+#14.43973 17.60750 80 % CI  
+#13.60127 18.44595 95 % CI 
+#45)Other observation
+#N?A
 
 #Holtz Winter
 #46)Perform Holt-Winters forecast for the next 12 months for the time series. 
@@ -421,8 +435,14 @@ plot(forecast_hw)
 summary(forecast_hw)
 
 #59)How good is the accuracy?
+#MAPE is 3.699873% which is the lowest in all models
 #60)What does it predict the time series value will be in one year?
+#16.191 is the point forecast
+#13.30585 19.07615 80 % CI   
+#11.77854 20.60346 95 % CI 
 #61)Other observation
+
+#N?A
 
 #ARIMA or Box-Jenkins
 
@@ -495,9 +515,10 @@ plot(residuals(fit), main = "Residuals of ARIMA Forecast", ylab = "Residuals", x
 #Histogram
 hist(fit$residuals)
 
-
+#73) Do a plot of fitted values vs. residuals. What does the plot indicate? 
 #errors are normally distributed indicated good fit
 
+#74) Do a plot of actual values vs. residuals. What does the plot indicate?
 # Fitted values vs. residuals
 plot(fitted(fit), residuals(ses_forecast), main = "Fitted Values vs. Residuals", xlab = "Fitted Values", ylab = "Residuals")
 abline(h = 0, col = "red")
@@ -507,34 +528,147 @@ plot(ts, residuals(fit), main = "Actual Values vs. Residuals", xlab = "Actual Va
 abline(h = 0, col = "red")
 #for fitted and actual residuals plot points are scattered randomly showing good fit model
 
-
+#75) Do an ACF plot of the residuals? What does this plot indicate?
 #ACF plot
 Acf(fit$residuals)
-#no Autocorreltead errors indicate model perfect fit 
+#no Correlated errors indicate model perfect fit 
 
 
-#Print the five measures of accuracy for this forecasting technique.
+#76)Print the five measures of accuracy for this forecasting technique.
 #Forecast 
-#Next one year. Show table and plot
-#Next two years. Show table and plot
-#Summarize this forecasting technique
-#How good is the accuracy?
-#What does it predict time series will be in one year and the next two years?
-#Other observation
+fcast<-forecast(fit,h=12)
+plot(fcast)
+accuracy(fcast)
 
 
+#77)Next one year. Show table and plot
 #forecast using ARIMA 1 year
 fcast<-forecast(fit,h=12)
 plot(fcast)
-summary(fcast)
+#78)Next two years. Show table and plot
 #forecast using ARIMA 2 years
 fcast1<-forecast(fit,h=24)
 plot(fcast1)
+
+#79)Summarize this forecasting technique
+
+summary(fcast)
+
 summary(fcast1)
 
+#ARIMA models are used to understand and predict future points in a time series by leveraging its own past values. It combines three components:
 
-accuracy(fcast)
+#Autoregressive (AR): This part of the model uses the dependent relationship between an observation and a number of lagged observations (past values).
 
+#Integrated (I): This involves differencing the time series data to make it stationary, which means the mean and variance are constant over time.
+
+#Moving Average (MA): This part uses the dependency between an observation and a residual error from a moving average model applied to lagged observations.
+
+#80) How good is the accuracy?
 #the MAPE value indicates that the forecast is fairly accurate, with a prediction error of around 2.48 which is the lowest %.
+
+#81) What does it predict time series will be in one year and the next two years?
+
+#Forecast Summary for the Next 2 Years (March 2024 - February 2026):
+#Month	Point Forecast
+#Mar 2024	16.55158
+#Apr 2024	17.37588
+#May 2024	16.95939
+#Jun 2024	17.44827
+#Jul 2024	16.69453
+#Aug 2024	16.96700
+#Sep 2024	17.08880
+#Oct 2024	18.07280
+#Nov 2024	17.69185
+#Dec 2024	16.82949
+#Jan 2025	18.50458
+#Feb 2025	18.25675
+#Mar 2025	17.64800
+#Apr 2025	17.61627
+#May 2025	17.75018
+#Jun 2025	17.93985
+#Jul 2025	17.85091
+#Aug 2025	17.94810
+#Sep 2025	18.22776
+#Oct 2025	18.58993
+#Nov 2025	18.38323
+#Dec 2025	18.12146
+#Jan 2026	18.61571
+#Feb 2026	18.45688
+
+#Other observation
+#N/A
+
+
+#Accuracy Summary
+#82)Show a table of all the forecast methods above with their accuracy measures. 
+#83)Separately define each forecast method and why it is useful. Show the best and worst forecast method for each of the accuracy measures. 
+
+
+#Below is a table summarizing the accuracy measures (Mean Absolute Percentage Error - MAPE) for different forecast methods. The MAPE values represent the accuracy of each method in terms of how close its predictions are to the actual data (lower MAPE indicates better accuracy).
+
+#Forecast Method	MAPE	Best Accuracy	Worst Accuracy
+#Naive	3.411387		✓ (Worst)
+#Holt-Winters (HW)	3.699873		
+#Simple Exponential Smoothing (SES)	2.88		
+#ARIMA	2.48	✓ (Best)	
+
+#Definition and Usefulness of Each Forecast Method
+#Naive Forecasting:
+
+#Definition: The naive forecasting method assumes that the next period's value will be the same as the current period's value. It simply uses the last observed value as the forecast.
+#Usefulness: This method is useful as a simple benchmark model, particularly when the time series is stable and there is no discernible trend or seasonality. However, it generally performs poorly for more complex data.
+#Best for: Very stable data with no trend or seasonality.
+#Accuracy: It often has the worst performance in terms of accuracy as it doesn’t consider trends or seasonality.
+
+#Holt-Winters (HW) Exponential Smoothing:
+
+#Definition: The Holt-Winters method extends simple exponential smoothing by incorporating both a trend component and a seasonality component. It is useful for time series with both trend and seasonal patterns.
+#Usefulness: This method is particularly effective for data with trend and seasonal components. It allows the model to smooth data, adjust for trends, and account for seasonal variations.
+#Best for: Data with both trend and seasonality.
+#Accuracy: In this case, it shows moderate accuracy, but may not perform as well as ARIMA for data with strong patterns.
+#Simple Exponential Smoothing (SES):
+
+#Definition: SES is a method that smooths the time series by giving exponentially decreasing weights to past observations. It’s most suitable for data without trend or seasonality.
+#Usefulness: It is a useful method for forecasting when the data doesn’t exhibit any trend or seasonal fluctuations, as it gives more weight to the more recent observations.
+#Best for: Data without trend or seasonality.
+#Accuracy: In this case, SES performs better than both Naive and Holt-Winters, with relatively low MAPE indicating good forecasting ability for non-seasonal, non-trending data.
+
+#ARIMA (AutoRegressive Integrated Moving Average):
+
+#Definition: ARIMA is a comprehensive forecasting model that combines autoregressive (AR) and moving average (MA) components, and it also includes an integration (I) component for handling non-stationary time series. It is used for data with a clear trend, and potentially seasonality (when extended to SARIMA).
+#Usefulness: ARIMA is versatile and can handle a wide range of time series data, from stationary to non-stationary, with trends or noise. It is particularly useful when the data shows a complex structure.
+#Best for: Data with trends and no clear seasonality (or seasonality can be handled with SARIMA).
+#Accuracy: ARIMA shows the best performance with the lowest MAPE, indicating it effectively captures both short-term and long-term dependencies in the data.
+#Best and Worst Methods Based on Accuracy Measures
+#Best Method (Lowest MAPE): ARIMA (MAPE = 2.48) is the best performing method for this dataset. It provides the most accurate forecast when compared to others, indicating it is well-suited for the given data.
+
+#Worst Method (Highest MAPE): Holt-Winters (MAPE = 3.699873) is the least accurate, even though it is a sophisticated method for data with seasonality and trends. It seems less effective for this particular dataset.
+
+#Conclusion:
+#ARIMA is the preferred forecasting model for this data, as it consistently produces the most accurate forecasts based on the lowest MAPE value. However, for simpler datasets without trends or seasonality, methods like Naive or SES might be appropriate due to their simplicity and reasonable accuracy for stable data.
+
+#Conclusion
+#84)Summarize your analysis of time series value over the time period. 
+#85)Based on your analysis and forecast above, do you think the value of the time series will increase, decrease, or stay flat over the next year? How about the next 2 years?
+
+#Conclusion for the Next Year (2024):
+#Flat Trend: The time series is expected to stay relatively flat over the next year, with minor fluctuations. There is no clear upward or downward trend based on the forecast values.
+#Conclusion for the Next Two Years (2025-2026):
+#Flat Trend: The forecast for the next two years also indicates that the values will not show significant growth or decline, staying within the range of 16.0. The slight oscillations in the forecast suggest small fluctuations, but overall the series appears to be flat.
+#Summary of Forecast Behavior:
+#Increase/Decrease: Based on the point forecasts and forecast intervals, the time series is not expected to increase or decrease significantly over the next two years. The values are predicted to stay relatively stable.
+#Fluctuations: The slight fluctuations within the forecast interval suggest that the time series might show some minor variability, but overall it is expected to remain relatively constant.
+#This indicates that the key drivers in the dataset are stable, and no major shifts (such as a large upward or downward trend) are expected in the near future.
+
+#86)Rank forecasting methods for this time series based on historical values.
+#Summary of Ranking:
+#Forecasting Method	MAPE	Ranking
+#ARIMA(3,1,0)	2.48	1st (Best)
+#Simple Exponential Smoothing	2.88	2nd
+#Naive Forecast	3.41	3rd
+#Holt-Winters	3.70	4th (Worst)
+
+
 ```
 
